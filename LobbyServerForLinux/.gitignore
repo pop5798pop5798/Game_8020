@@ -1,0 +1,5 @@
+/bin/Release
+/bin/Debug
+/.vs/AspNetCoreChatRoom/v16
+/obj/x86
+/Log
