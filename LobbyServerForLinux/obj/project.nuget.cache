@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "2Z2s51tk+3AR6pHXv1rrf54uPkWRXtkCf2fy1N70dibHhjTYY25Y9EL1Kip2UHy+hjnUhcFH+gzzfmnK+tvFGA==",
+  "dgSpecHash": "ubAMjR1vucmAgtBCw2/d0r7lrOsGjnKVjMXNsGTxnfLexOs6lejelz2h1kbXHPxJadwQUnFXz9UIyQsHT3Chfg==",
   "success": true,
-  "projectFilePath": "E:\\p2pAntDat\\P2PCore\\LobbyServerForLinux-master\\LobbyServerForLinux\\LobbyServerForLinux.csproj",
+  "projectFilePath": "E:\\GameTime\\Game_8020\\LobbyServerForLinux\\LobbyServerForLinux.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\kai\\.nuget\\packages\\microsoft.csharp\\4.4.0\\microsoft.csharp.4.4.0.nupkg.sha512",
     "C:\\Users\\kai\\.nuget\\packages\\microsoft.entityframeworkcore\\2.0.0\\microsoft.entityframeworkcore.2.0.0.nupkg.sha512",

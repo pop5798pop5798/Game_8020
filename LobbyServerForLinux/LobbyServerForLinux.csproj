@@ -16,4 +16,10 @@
     <PackageReference Include="StackExchange.Redis" Version="2.2.62" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="MhCore">
+      <HintPath>bin\MhCore.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

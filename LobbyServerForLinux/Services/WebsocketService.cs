@@ -33,9 +33,29 @@ namespace LobbyServerForLinux
     /// <summary> WebSocket連線主服務 </summary>
     public class WebsocketService
     {
+        private bool m_isShutdown = false;                                          // 關機
+        private int m_openAmount = 0;                                               // 開放區域
+        private int m_areaAmount = 3;                                               // 分區數量
+        private int[] m_levelInfo = Program.Ante;								    // 底注
+        private int[] m_levelLimit = Program.Limit;						            // 玩家最小帶入金額
+        private int[] g_area = Program.GameArea;							        // 分區
+        private int[] m_tableAmount = new int[] { 30, 30, 20 };                     // 桌數量
+        private bool m_IsDeployRobot = true;                                       //是否真人配桌
+
+        private readonly int[] WinRate = new int[] { 90, 50, 40 };
+        private readonly int[] loseCard = new int[] { 80, 99 };
+        private readonly int Avg = 50;
+
+        private List<List<FightGame>> m_waitRooms = new List<List<FightGame>>();	// 遊戲房對應區
+        private List<List<int>> m_waitPlayers = new List<List<int>>();				// 玩家等侯湊桌區
+        public List<int[]> KickAllList = new List<int[]>();                         // 踢線清單
+
+
+        //---------------------------------------------------------------
         private readonly RequestDelegate _next;
         private readonly ILogger _logger;
         private static P2PContext _db = new P2PContext();
+      
 
         private static DateTime m_ProgressTime = DateTime.Now;
         private static DateTime m_IPTime = DateTime.Now;
@@ -49,9 +69,9 @@ namespace LobbyServerForLinux
         private static List<PlayerData> base64List = new List<PlayerData>();
         
 
-        private static List<Player> AllPaleyr = new List<Player>();
+        //private static List<Player> AllPaleyr = new List<Player>();
 
-        private static List<Player> GetProgress = new List<Player>();
+        //private static List<Player> GetProgress = new List<Player>();
 
         private static List<FileCount> fileCount = new List<FileCount>();
 
@@ -80,6 +100,16 @@ namespace LobbyServerForLinux
             aTimer.Elapsed += async (sender, e) => await OnTimedEventAsync();
             aTimer.AutoReset = true;
             aTimer.Enabled = true;
+
+            //Step: 建置級別區及其等侯區.
+            for (int i = 0; i < m_levelInfo.Length; i++)
+            {
+                // 級別區對應房.
+                m_waitRooms.Add(new List<FightGame>());
+
+                // 級別區等侯玩家.
+                m_waitPlayers.Add(new List<int>());
+            }
         }
 
 
@@ -151,54 +181,42 @@ namespace LobbyServerForLinux
             
             switch (message.Cmd)
             {
-                //case "SystemCheck"://取得是否連線
-                //    cmdSystemCheck(message.Sn);
-                //    break;
-                case "GetMore":
-                    GetMore(message.Sn, message.Data.ToString());
-                    break;
-                case "SetBase64":
-                    SetBase64(message.Sn, message.Data.ToString());
-                    break;
-                case "GetPing":
-                    await GetPing(client);
-                    break;
-                case "GetFileState"://取得全部存在檔案的狀態
-                    GetFilesState(client);
-                    break;
-                case "DataState"://取得檔案的狀態
-                    GetDataState(message.Sn, client, message.Data.ToString());
-                    break;
+                case "User_Accept": return;
+                case "User_Disconnect": 
+                    //cmdUserDisconnect(sn, data); 
+                    return;
+                case GameCommand.SystemCheck:  return;
+                case GameCommand.UserLogin:  return;
+                case GameCommand.GetLobbyInfo:  return;
+                case GameCommand.GetLobbyToken:  return;
 
-                case "Search"://取得搜尋的檔案資訊
-                    SearchAsync(message.Sn,client, message.Data.ToString());
-                    break;
-                case "SetData"://設定使用者分享檔案
-                    await SetPlayerAsync(message.Data.ToString(), client);
-                    break;
-                case "GetDetail"://發送下載請求給檔案持有者
-                    SendDetailAsync(message.Sn, message.Data.ToString());
+                case GameCommand.ReturnLobby:  return;
 
-                    break;
-                case "GetData": //取得自已的全部分享檔案
-                    SendStringAsync(message.Sn,client, message.Data.ToString());
-                    break;
-                case "GetDataDetail": //取得分享連結的檔案
-                    GetDataDetailAsync(message.Sn, client, message.Data.ToString());
-                    break;
-                case "PostData": //取得檔案並上傳(回傳和發送)
-                    try
+                case GameCommand.WaitGameGroup:  return;
+                case GameCommand.CancelWait:  return;
+                case GameCommand.CheckUser:  return;
+                case GameCommand.SwitchServerFunc:  return;
+                case GameCommand.MaintainSwitch: return;
+                case GameCommand.KickUser:  return;
+                case GameCommand.KickAll:  return;
+                case GameCommand.ServerGetPing:  return;
+                case GameCommand.SetUserBlack:  return;
+                case GameCommand.ClientGetPing:  return;
+                case GameCommand.CheckGameRun:  return;
+                case GameCommand.Announcement:  return;
+                case GameCommand.WriteMemberReport:
                     {
-                        await SendPostDataAsync(message.Data.ToString());
-                    }
-                    catch (Exception ex)
-                    {
-                        Program.WriteLog("TryCatch", "Err: " + ex);
-                    }
 
-                    break;
+                        return;
+                    }
+                case GameCommand.GetHistoryRecord:
+                    {
+
+                        return;
+                    }
                 default:
-                    break;
+
+                    return;
             }
         }
 
@@ -404,79 +422,7 @@ namespace LobbyServerForLinux
 
 
 
-        //取得全部存在檔案的狀態
-        private static void GetFilesState(WebsocketClient client)
-        {
-            try {
-                CmdData info = new CmdData();
-                info.Cmd = "GetFileState";
-                info.Data = Program.DataList;
 
-                string _data = JsonConvert.SerializeObject(info);
-
-                client.SendMessageAsync(_data);
-                Player p = new Player();
-                p.userKey = client.Id;
-                GetProgress.Add(p);
-            }
-            catch(Exception ex)
-            {
-                Program.WriteLog("TryCatch", "Err: " + ex);
-            }
-
-
-        }
-
-        //取得檔案狀態
-        private static void GetDataState(string Sn,WebsocketClient client, string data)
-        {
-            try {
-                SData json = JsonConvert.DeserializeObject<SData>(data);
-                var ds = Program.DataList.Where(x => x.userID == json.uID).ToList();
-                Player p = new Player();
-                p.userKey = client.Id;
-                p.fname = json.fileName;
-                p.uSn = MD5Hash(json.username);
-                GetProgress.Add(p);
-                SData sdata = new SData();
-                foreach (var _ds in ds)
-                {
-                    var _sData = _ds.sData.Where(x => x.fSn == json.fSn).FirstOrDefault();
-                    if (_sData != null)
-                    {
-                        sdata = _ds.sData.Where(x => x.fSn == json.fSn).FirstOrDefault();
-                        break;
-                    }
-
-                }
-
-                //bool isgoWait = waitList.Any(x => x.fSn == json.fSn && x.sn == Sn);
-                //if (isgoWait) return;
-                WaitFiles wait = new WaitFiles();
-                wait.sn = Sn;
-                wait.fSn = json.fSn;
-                wait.hloderID = json.uID;
-                waitList.Add(wait);
-
-
-
-                CmdData info = new CmdData();
-                info.Cmd = "DataState";
-                info.Data = sdata;
-
-                string _data = JsonConvert.SerializeObject(info);
-                client.SendMessageAsync(_data);
-
-            }
-            catch (Exception ex)
-            {
-                Program.WriteLog("TryCatch", "Err: " + ex);
-            }
-
-
-
-
-        }
 
         //發送下載請求給檔案持有者
         private static void SendDetailAsync(string cSn, string data)
@@ -1559,30 +1505,6 @@ namespace LobbyServerForLinux
                     }
                 }
                     
-                for (int i = 0; i < GetProgress.Count; i++)
-                {
-                    var client = WsCollectionService.Get(GetProgress[i].userKey);
-                    if (client != null)
-                    {
-                        CmdData info = new CmdData();
-                        info.Cmd = "Progress";
-                        if (GetProgress[i].fname != null && GetProgress[i].uSn != null)
-                        {
-                            var getData = dom.Where(x => x.uSn == GetProgress[i].uSn && x.fileName == GetProgress[i].fname).ToList();
-                            info.Data = getData;
-                        }
-                        else {
-                            info.Data = dom;
-                        }
-                        
-                        var _data = JsonConvert.SerializeObject(info);
-                        client.SendMessageAsync(_data);
-                    }
-                    else
-                    {
-
-                    }
-                }
 
                 //Debug.WriteLine(dom.Count());
                 //Debug.WriteLine(JsonConvert.SerializeObject(dom));

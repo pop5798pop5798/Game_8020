@@ -5739,11 +5739,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\p2pAntDat\\P2PCore\\LobbyServerForLinux-master\\LobbyServerForLinux\\LobbyServerForLinux.csproj",
+      "projectUniqueName": "E:\\GameTime\\Game_8020\\LobbyServerForLinux\\LobbyServerForLinux.csproj",
       "projectName": "LobbyServerForLinux",
-      "projectPath": "E:\\p2pAntDat\\P2PCore\\LobbyServerForLinux-master\\LobbyServerForLinux\\LobbyServerForLinux.csproj",
+      "projectPath": "E:\\GameTime\\Game_8020\\LobbyServerForLinux\\LobbyServerForLinux.csproj",
       "packagesPath": "C:\\Users\\kai\\.nuget\\packages\\",
-      "outputPath": "E:\\p2pAntDat\\P2PCore\\LobbyServerForLinux-master\\LobbyServerForLinux\\obj\\",
+      "outputPath": "E:\\GameTime\\Game_8020\\LobbyServerForLinux\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Microsoft\\Xamarin\\NuGet\\",

@@ -14,6 +14,21 @@ namespace LobbyServerForLinux
 {
     public class Program
     {
+        // 遊戲ID.
+        public const int GameID = 1020;
+        public static int ServerID = 0;                 // 伺服器ID
+        public static int InnerChannel = 1;             // 內部分流數
+        //底注
+        public static int[] Ante = { 1, 10, 100 };          // 底注
+        public static int[] Limit = { 10, 100, 1000 };   // 入場限額
+        public static int[] GameArea = { 1, 2, 3 };
+        public static int[] OpenState = { 1, 1, 1 };        // 開放狀態
+        public static int[] Rate = { 95, 50, 85 };      // 機率
+        public static int[] LoseRate = { 85, 90 };      // 輸牌機率
+        public static int AvgRate = 50;      // 自然機率
+        public static int[] LoseLimit = { 5000, 10000, 10000 }; // 階級總輸警戒值
+        private static decimal[] ObsWinLose = { 0, 0, 0 };      // 階級總輸贏
+
         public static List<PlayerData> playData = new List<PlayerData>();
         public static List<DataState> DataList = new List<DataState>();
         
